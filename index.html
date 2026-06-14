@@ -1,0 +1,1575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MyLawyer – Legal Aid & Safety for Cameroon</title>
+<style>
+/* ═══════════════════════════════════════════════════════
+   MyLawyer — Cameroon Legal Aid & Safety App
+   Vanilla JS / CSS — GitHub Pages ready
+   ═══════════════════════════════════════════════════════ */
+
+/* ── COLOURS ── */
+:root {
+  --green: #0A3D2B;
+  --green-mid: #1A6B47;
+  --green-light: #2D9A65;
+  --gold: #C8A84B;
+  --gold-light: #F0D080;
+  --red: #D0222A;
+  --off-white: #F5F2EA;
+  --text: #0D1F17;
+  --muted: #5A7060;
+  --border: #D6E5D8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: Arial, Helvetica, sans-serif;
+  background: var(--off-white);
+  color: var(--text);
+  max-width: 430px;
+  margin: 0 auto;
+  min-height: 100vh;
+  position: relative;
+}
+
+button, input, textarea, select { font-family: inherit; }
+
+/* ═══════════════ SPLASH SCREEN ═══════════════ */
+#splashScreen {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+#splashWord {
+  display: flex;
+  align-items: flex-end;
+  gap: 2px;
+  margin-bottom: 20px;
+}
+.sl {
+  font-size: 56px;
+  font-weight: 900;
+  line-height: 1;
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(-50px) rotate(-160deg);
+}
+.sl-my  { color: var(--green); }
+.sl-law { color: var(--gold); }
+.sl.show {
+  opacity: 1;
+  transform: translateY(0) rotate(0deg);
+  transition: transform 0.55s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease;
+}
+.sl.wave {
+  transform: translateY(-20px);
+  transition: transform 0.18s ease-in-out;
+}
+#splashSub {
+  opacity: 0;
+  transition: opacity 0.4s ease;
+  text-align: center;
+}
+#splashSub.show { opacity: 1; }
+#splashSub .icon { font-size: 42px; margin-bottom: 8px; }
+#splashSub .tag {
+  font-size: 11px; font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase; color: var(--muted);
+}
+#splashScreen.fadeout {
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+
+/* ═══════════════ NAVBAR ═══════════════ */
+.navbar {
+  background: var(--green);
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+}
+.hamburger {
+  background: none; border: none; cursor: pointer;
+  display: flex; flex-direction: column; gap: 5px; padding: 2px;
+}
+.hamburger span {
+  display: block; width: 22px; height: 2px;
+  background: var(--off-white); border-radius: 2px;
+}
+.brand {
+  font-weight: 900; font-size: 24px; color: var(--gold);
+  letter-spacing: 0.5px; display: flex; align-items: center; gap: 6px;
+}
+.brand span { color: var(--off-white); }
+.brand .scales {
+  font-size: 20px;
+  animation: glowGold 2.5s ease-in-out infinite;
+}
+@keyframes glowGold {
+  0%, 100% { filter: drop-shadow(0 0 5px rgba(200,168,75,.8)); }
+  50%      { filter: drop-shadow(0 0 12px rgba(200,168,75,1)); }
+}
+.nav-right { display: flex; align-items: center; gap: 10px; }
+.lang-toggle {
+  display: flex; align-items: center; gap: 3px;
+  background: rgba(255,255,255,0.12); border-radius: 20px; padding: 4px 6px;
+  cursor: pointer; border: 1px solid rgba(255,255,255,0.2);
+}
+.lang-btn {
+  font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 14px;
+  color: rgba(255,255,255,0.5); cursor: pointer; transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+.lang-btn.active { background: var(--gold); color: var(--green); }
+.danger-wrap { display: flex; align-items: center; gap: 7px; cursor: pointer; }
+.danger-label {
+  font-size: 11px; font-weight: 700; color: var(--gold-light);
+  letter-spacing: 1px; text-transform: uppercase;
+}
+.pulse-btn {
+  width: 34px; height: 34px; border-radius: 50%; background: var(--red);
+  border: none; cursor: pointer; display: flex; align-items: center;
+  justify-content: center; position: relative; z-index: 1;
+  animation: pulseRed 1s ease-in-out infinite;
+}
+.pulse-btn::before, .pulse-btn::after {
+  content: ''; position: absolute; inset: 0; border-radius: 50%;
+  border: 3px solid #FF1A1A; z-index: -1;
+  animation: sirenRing 1.2s cubic-bezier(0.2, 0.6, 0.4, 1) infinite;
+}
+.pulse-btn::after { animation-delay: 0.4s; }
+@keyframes pulseRed {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(255,26,26,.7), 0 0 8px 1px rgba(255,26,26,.5); }
+  50%       { box-shadow: 0 0 0 6px rgba(255,26,26,0), 0 0 14px 3px rgba(255,26,26,.8); }
+}
+@keyframes sirenRing {
+  0%   { transform: scale(1);    opacity: 1; border-color: #FF1A1A; }
+  60%  { opacity: 0.5; border-color: #FF4444; }
+  100% { transform: scale(1.7);    opacity: 0; border-color: #FF6666; }
+}
+
+/* ═══════════════ HERO ═══════════════ */
+.hero {
+  background: linear-gradient(160deg, var(--green) 0%, var(--green-mid) 60%, var(--green-light) 100%);
+  padding: 32px 20px 40px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-tag {
+  font-size: 11px; font-weight: 600; letter-spacing: 2px; color: var(--gold-light);
+  text-transform: uppercase; margin-bottom: 8px;
+}
+.hero-title {
+  font-size: 26px; font-weight: 900; line-height: 1.2; color: #fff; margin-bottom: 10px;
+}
+.hero-title span { color: var(--gold); }
+.hero-sub { font-size: 13px; color: rgba(255,255,255,0.75); line-height: 1.6; margin-bottom: 24px; }
+
+/* ── Advice Bar ── */
+.advice-bar {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px; padding: 16px;
+}
+.advice-label {
+  font-size: 11px; font-weight: 700; color: var(--gold-light);
+  letter-spacing: 1.5px; text-transform: uppercase; margin-bottom: 10px;
+}
+.advice-trigger {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255,255,255,0.95); border-radius: 50px; padding: 14px 18px;
+  cursor: pointer;
+}
+.advice-trigger .avatar {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--green-mid);
+  display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0;
+}
+.advice-trigger .placeholder-text { font-size: 15px; color: #aaa; }
+.advice-composer { display: none; flex-direction: column; gap: 12px; }
+.advice-composer.open { display: flex; }
+.advice-composer-top { display: flex; align-items: flex-start; gap: 10px; }
+.advice-composer-top .avatar {
+  width: 36px; height: 36px; border-radius: 50%; background: var(--green-mid);
+  display: flex; align-items: center; justify-content: center; font-size: 16px;
+  flex-shrink: 0; margin-top: 4px;
+}
+#adviceInput {
+  flex: 1; background: #fff; border: none; border-radius: 14px; padding: 14px 16px;
+  font-size: 16px; color: #111; outline: none; line-height: 1.7; min-height: 120px;
+  resize: none; box-sizing: border-box; width: 100%;
+}
+#adviceInput::placeholder { color: #999; }
+.composer-actions {
+  display: flex; gap: 8px; border-top: 1px solid rgba(255,255,255,0.15); padding-top: 12px;
+}
+.upload-opts { display: flex; gap: 8px; }
+.upload-opt {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 20px; padding: 8px 14px; cursor: pointer; font-size: 12px; font-weight: 600;
+  color: rgba(255,255,255,0.85);
+}
+.ask-btn {
+  margin-left: auto; background: var(--gold); border: none; border-radius: 20px;
+  padding: 10px 22px; font-size: 14px; font-weight: 700; color: var(--green);
+  cursor: pointer; display: flex; align-items: center; gap: 8px; white-space: nowrap;
+}
+.advice-answer {
+  display: none; background: #eff8f3; border: 1px solid var(--border);
+  border-radius: 14px; padding: 14px; margin-top: 12px;
+}
+.advice-answer.show { display: block; }
+.advice-answer-header { display: flex; align-items: center; gap: 7px; margin-bottom: 8px; }
+.ai-badge {
+  background: var(--green-mid); color: #fff; font-size: 9px; font-weight: 700;
+  padding: 2px 7px; border-radius: 20px; letter-spacing: 1px;
+}
+.answer-query { font-size: 12px; font-weight: 600; color: var(--green); }
+.answer-text { font-size: 13px; color: var(--text); line-height: 1.6; white-space: pre-wrap; }
+.bounce-loader { display: flex; gap: 5px; }
+.bounce-loader span {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--green-mid);
+  animation: bounce 1s infinite;
+}
+.bounce-loader span:nth-child(2) { animation-delay: 0.15s; }
+.bounce-loader span:nth-child(3) { animation-delay: 0.3s; }
+@keyframes bounce {
+  0%,100% { transform: translateY(0); opacity: .5; }
+  50%       { transform: translateY(-5px); opacity: 1; }
+}
+
+/* ═══════════════ SECTIONS ═══════════════ */
+.section { padding: 20px 18px; }
+.section-title {
+  font-size: 15px; font-weight: 700; color: var(--green);
+  margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+}
+.section-title .line { flex: 1; height: 1px; background: var(--border); }
+
+/* Categories grid */
+.cat-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+.cat-card {
+  background: #fff; border: 1px solid var(--border); border-radius: 14px;
+  padding: 14px 8px 12px; display: flex; flex-direction: column; align-items: center;
+  gap: 7px; cursor: pointer; text-align: center;
+}
+.cat-card .icon { font-size: 24px; }
+.cat-card .name { font-size: 11px; font-weight: 600; color: var(--green); line-height: 1.3; }
+
+/* Services */
+.service-card {
+  background: #fff; border: 1px solid var(--border); border-radius: 16px;
+  padding: 16px; margin-bottom: 10px; display: flex; align-items: flex-start;
+  gap: 14px; cursor: pointer;
+}
+.service-icon {
+  width: 44px; height: 44px; border-radius: 12px; background: var(--green);
+  display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0;
+}
+.service-info { flex: 1; }
+.service-info .title { font-size: 14px; font-weight: 700; margin-bottom: 3px; }
+.service-info .desc { font-size: 12px; color: var(--muted); line-height: 1.5; }
+.service-arrow { color: var(--muted); align-self: center; font-size: 18px; }
+
+/* ═══════════════ BOTTOM NAV ═══════════════ */
+.bottom-nav {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 430px; background: var(--green); display: flex;
+  padding: 8px 0 14px; border-top: 1px solid rgba(255,255,255,0.1); z-index: 90;
+}
+.nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px;
+  cursor: pointer; padding: 4px 0;
+}
+.nav-item .icon { font-size: 20px; }
+.nav-item .label {
+  font-size: 9px; font-weight: 600; letter-spacing: 0.5px; text-transform: uppercase;
+  color: rgba(255,255,255,0.5);
+}
+.nav-item.active .label { color: var(--gold); }
+
+/* ═══════════════ MODAL ═══════════════ */
+.overlay {
+  display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200;
+  align-items: flex-end; justify-content: center; backdrop-filter: blur(3px);
+}
+.overlay.open { display: flex; }
+.modal {
+  background: #fff; border-radius: 24px 24px 0 0; padding: 28px 22px 40px;
+  width: 100%; max-width: 430px; max-height: 90vh; overflow-y: auto;
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-handle { width: 40px; height: 4px; background: #ddd; border-radius: 4px; margin: 0 auto 20px; }
+.modal h2 { font-size: 22px; font-weight: 900; color: var(--green); margin-bottom: 6px; }
+.modal-sub { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+
+/* Form elements */
+.form-group { margin-bottom: 14px; }
+.form-label {
+  font-size: 11px; font-weight: 700; color: var(--muted); letter-spacing: 0.8px;
+  text-transform: uppercase; margin-bottom: 5px; display: block;
+}
+.form-input {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 11px;
+  padding: 11px 14px; font-size: 14px; color: var(--text); background: #fafafa;
+  outline: none; box-sizing: border-box;
+}
+.form-select {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 11px;
+  padding: 11px 14px; font-size: 14px; color: var(--text); background: #fafafa;
+  outline: none; box-sizing: border-box;
+}
+.submit-btn {
+  width: 100%; background: var(--green); color: #fff; border: none; border-radius: 14px;
+  padding: 15px; font-size: 15px; font-weight: 700; cursor: pointer; margin-bottom: 8px;
+}
+.cancel-btn {
+  width: 100%; background: none; border: none; color: var(--muted); font-size: 14px;
+  cursor: pointer; padding: 8px;
+}
+.toggle-btn-row { display: flex; gap: 8px; }
+.toggle-btn {
+  flex: 1; border: 1.5px solid var(--border); border-radius: 10px; padding: 8px 4px;
+  font-size: 11px; font-weight: 600; color: var(--muted); background: #fafafa; cursor: pointer;
+}
+.toggle-btn.active { border-color: var(--green-light); background: #eff8f3; color: var(--green); }
+
+/* Phone input with prefix */
+.phone-wrap {
+  display: flex; border: 1.5px solid var(--border); border-radius: 11px;
+  background: #fafafa; overflow: hidden;
+}
+.phone-prefix {
+  padding: 11px 10px 11px 14px; font-size: 14px; font-weight: 700; color: var(--green);
+  background: #f0f6f2; border-right: 1.5px solid var(--border); white-space: nowrap;
+}
+.phone-input {
+  flex: 1; border: none; background: transparent; padding: 11px 14px;
+  font-size: 14px; color: var(--text); outline: none;
+}
+
+/* Danger modal */
+.urgent-btn {
+  width: 100%; background: var(--red); color: #fff; border: none; border-radius: 14px;
+  padding: 16px; font-size: 16px; font-weight: 700; cursor: pointer; margin-bottom: 12px;
+  box-shadow: 0 0 0 8px rgba(208,34,42,0.15); animation: pulse 1.5s infinite;
+}
+@keyframes pulse {
+  0%, 100% { box-shadow: 0 0 0 8px rgba(208,34,42,0.15); }
+  50%       { box-shadow: 0 0 0 14px rgba(208,34,42,0.05); }
+}
+.not-urgent-btn {
+  width: 100%; background: #f0f6f2; color: var(--green); border: 2px solid var(--border);
+  border-radius: 14px; padding: 15px; font-size: 16px; font-weight: 700; cursor: pointer;
+  margin-bottom: 12px;
+}
+.sos-circle {
+  width: 90px; height: 90px; border-radius: 50%; background: var(--red); display: flex;
+  align-items: center; justify-content: center; margin: 0 auto 18px; font-size: 22px;
+  font-weight: 900; color: #fff; box-shadow: 0 0 0 8px rgba(208,34,42,0.2);
+}
+.sos-circle.sent { box-shadow: 0 0 0 20px rgba(208,34,42,0); }
+.contact-sent {
+  background: #e8f5e9; border: 1px solid #66bb6a; border-radius: 12px; padding: 8px 12px;
+  font-size: 12px; font-weight: 600; color: #2e7d32; display: flex; align-items: center;
+  justify-content: space-between;
+}
+.no-contacts-warning {
+  background: #fff8e7; border: 1px solid #e8d28a; border-radius: 12px; padding: 12px;
+  margin-bottom: 16px; font-size: 12px; color: #b8860b; text-align: left;
+}
+.call-btn-row { display: flex; gap: 8px; margin-bottom: 8px; }
+.call-btn {
+  flex: 1; border: none; border-radius: 12px; padding: 12px; font-size: 13px;
+  font-weight: 700; cursor: pointer; color: #fff;
+}
+.call-police { background: var(--red); }
+.call-fire { background: #E08A2E; }
+
+/* Modal categories grid */
+.modal-cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px; }
+.modal-cat-btn {
+  background: #f5f9f6; border: 1.5px solid var(--border); border-radius: 14px;
+  padding: 14px 10px; display: flex; flex-direction: column; align-items: center;
+  gap: 8px; cursor: pointer; text-align: center;
+}
+.modal-cat-btn .icon { font-size: 26px; }
+.modal-cat-btn .name { font-size: 12px; font-weight: 600; color: var(--green); }
+
+/* Incident modal */
+.incident-header { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+.incident-header .icon { font-size: 32px; }
+.incident-header .title { font-size: 17px; font-weight: 900; }
+.incident-header .sub { font-size: 12px; color: var(--muted); }
+.nearest-unit-box {
+  background: #fff8e7; border: 1px solid #e8d28a; border-radius: 12px; padding: 14px; margin-bottom: 16px;
+}
+.nearest-unit-label {
+  font-size: 10px; font-weight: 700; color: #B8860B; letter-spacing: 1px;
+  text-transform: uppercase; margin-bottom: 4px;
+}
+.nearest-unit-name { font-size: 15px; font-weight: 700; margin-bottom: 8px; }
+.unit-contact-row { display: flex; gap: 8px; }
+.unit-call {
+  flex: 1; background: var(--green-mid); color: #fff; border: none; border-radius: 10px;
+  padding: 9px; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+.unit-email {
+  flex: 1; background: #e8f0fe; color: #1a73e8; border: none; border-radius: 10px;
+  padding: 9px; font-size: 12px; font-weight: 600; cursor: pointer;
+}
+#complaintText {
+  width: 100%; border: 1.5px solid var(--border); border-radius: 12px; padding: 14px 16px;
+  font-size: 14px; resize: none; outline: none; color: #111; background: #fff;
+  margin-bottom: 10px; box-sizing: border-box; line-height: 1.6;
+}
+.incident-upload-row { display: flex; gap: 8px; margin-bottom: 10px; }
+.incident-upload-btn {
+  flex: 1; border: 1.5px dashed var(--border); border-radius: 12px; background: #f8fbf9;
+  padding: 10px; cursor: pointer; display: flex; flex-direction: column; align-items: center;
+  gap: 4px; font-size: 11px; color: var(--muted); font-weight: 600;
+}
+.incident-upload-btn .icon { font-size: 20px; }
+.file-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 16px; }
+.file-chip {
+  background: #eff8f3; border: 1px solid var(--border); border-radius: 10px; padding: 5px 10px;
+  font-size: 11px; font-weight: 600; color: var(--green); display: flex; align-items: center; gap: 6px;
+}
+.file-chip button { background: none; border: none; cursor: pointer; color: #999; font-size: 14px; }
+
+/* Profile modal */
+.profile-pic-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 22px; }
+.profile-pic-circle {
+  width: 100px; height: 100px; border-radius: 50%; background: var(--green-light);
+  display: flex; align-items: center; justify-content: center; font-size: 40px;
+  cursor: pointer; overflow: hidden; position: relative; border: 3px solid var(--gold);
+  box-shadow: 0 0 0 6px rgba(200,168,75,0.15);
+}
+.profile-pic-circle img { width: 100%; height: 100%; object-fit: cover; }
+.profile-pic-tap {
+  position: absolute; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,0.4);
+  color: #fff; font-size: 9px; font-weight: 700; text-align: center; padding: 4px; letter-spacing: 0.5px;
+}
+.profile-pic-label {
+  font-size: 12px; color: var(--muted); margin-top: 10px; cursor: pointer; font-weight: 600;
+}
+.emergency-contact-box {
+  margin-bottom: 10px; background: #f8fbf9; border: 1px solid var(--border);
+  border-radius: 12px; padding: 10px;
+}
+.emergency-contact-label { font-size: 11px; font-weight: 700; color: var(--green-mid); margin-bottom: 8px; }
+
+/* ═══════════════ DRAWER ═══════════════ */
+.drawer-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 300; }
+.drawer-overlay.open { display: block; }
+.drawer {
+  position: fixed; top: 0; right: -280px; width: 280px; height: 100%;
+  background: var(--green); z-index: 301; transition: right 0.3s ease;
+  display: flex; flex-direction: column;
+}
+.drawer.open { right: 0; }
+.drawer-top { padding: 20px 20px 16px; border-bottom: 1px solid rgba(255,255,255,0.1); position: relative; }
+.drawer-brand { font-size: 22px; font-weight: 900; color: var(--gold); }
+.drawer-brand span { color: var(--off-white); }
+.drawer-tag { font-size: 11px; color: rgba(255,255,255,0.5); margin-top: 3px; }
+.drawer-close {
+  position: absolute; top: 18px; right: 16px; background: rgba(255,255,255,0.1); border: none;
+  color: #fff; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 16px;
+}
+.drawer-items { flex: 1; overflow-y: auto; }
+.drawer-item {
+  display: flex; align-items: center; gap: 14px; padding: 14px 22px; cursor: pointer;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.drawer-item .icon { font-size: 20px; width: 28px; text-align: center; }
+.drawer-item .label { font-size: 15px; font-weight: 600; color: var(--off-white); }
+.drawer-item .badge {
+  margin-left: auto; background: var(--gold); color: var(--green); font-size: 9px;
+  font-weight: 800; padding: 2px 7px; border-radius: 10px;
+}
+.drawer-bottom { padding: 18px 22px; border-top: 1px solid rgba(255,255,255,0.1); }
+.drawer-signup-btn {
+  width: 100%; background: var(--gold); color: var(--green); border: none; border-radius: 12px;
+  padding: 13px; font-size: 14px; font-weight: 800; cursor: pointer;
+}
+
+.bottom-pad { height: 80px; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════ SPLASH SCREEN ═══════════════ -->
+<div id="splashScreen">
+  <div id="splashWord">
+    <span class="sl sl-my">M</span>
+    <span class="sl sl-my">y</span>
+    <span class="sl sl-law">L</span>
+    <span class="sl sl-law">a</span>
+    <span class="sl sl-law">w</span>
+    <span class="sl sl-law">y</span>
+    <span class="sl sl-law">e</span>
+    <span class="sl sl-law">r</span>
+  </div>
+  <div id="splashSub">
+    <div class="icon">⚖️</div>
+    <div class="tag">Legal Aid &amp; Safety · Cameroon 🇨🇲</div>
+  </div>
+</div>
+
+<!-- ═══════════════ NAVBAR ═══════════════ -->
+<nav class="navbar">
+  <button class="hamburger" onclick="toggleDrawer()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="brand">My<span>Lawyer</span><span class="scales">⚖️</span></div>
+  <div class="nav-right">
+    <div class="lang-toggle">
+      <div class="lang-btn active" id="langEN" onclick="setLang('EN')">EN</div>
+      <div class="lang-btn" id="langFR" onclick="setLang('FR')">FR</div>
+    </div>
+    <div class="danger-wrap" onclick="openDanger()">
+      <span class="danger-label">DANGER</span>
+      <button class="pulse-btn" aria-label="Report danger">
+        <svg viewBox="0 0 24 24" width="16" height="16" fill="#fff">
+          <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5S10.62 6.5 12 6.5s2.5 1.12 2.5 2.5S13.38 11.5 12 11.5z"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</nav>
+
+<!-- ═══════════════ HERO ═══════════════ -->
+<section class="hero">
+  <div class="hero-tag" id="heroTag">Legal Aid & Safety — Cameroon</div>
+  <h1 class="hero-title">
+    <span id="heroTitle1">Your Rights.</span><br/>
+    <span id="heroTitle2" style="color:var(--gold)">Your Protection.</span>
+  </h1>
+  <p class="hero-sub" id="heroSub">Get instant legal advice based on Cameroonian law, report safety incidents, and connect with the right authorities.</p>
+
+  <!-- Legal Advice Bar -->
+  <div class="advice-bar">
+    <div class="advice-label" id="adviceLabel">Seek Legal Assistance</div>
+
+    <!-- Collapsed trigger -->
+    <div class="advice-trigger" id="adviceTrigger" onclick="openComposer()">
+      <div class="avatar">⚖️</div>
+      <span class="placeholder-text" id="adviceTriggerText">What legal question is on your mind?</span>
+    </div>
+
+    <!-- Expanded composer -->
+    <div class="advice-composer" id="adviceComposer">
+      <div class="advice-composer-top">
+        <div class="avatar">⚖️</div>
+        <textarea id="adviceInput" rows="5" onkeydown="adviceKeydown(event)"
+          placeholder="Ask your legal question... e.g. How do I register a business in Cameroon?"></textarea>
+      </div>
+      <div class="composer-actions">
+        <div class="upload-opts">
+          <label class="upload-opt">
+            <span style="font-size:15px">📷</span> Photo
+            <input type="file" accept="image/*" style="display:none" />
+          </label>
+          <label class="upload-opt">
+            <span style="font-size:15px">📄</span> Doc
+            <input type="file" accept=".pdf,.doc,.docx" style="display:none" />
+          </label>
+        </div>
+        <button class="ask-btn" onclick="sendAdvice()">
+          <span id="askBtnText">Ask</span> ›
+        </button>
+      </div>
+    </div>
+
+    <!-- Answer box -->
+    <div class="advice-answer" id="adviceAnswer">
+      <div class="advice-answer-header">
+        <span class="ai-badge" id="aiBadge">AI · Cameroonian Law</span>
+        <span class="answer-query" id="answerQuery"></span>
+      </div>
+      <div class="answer-text" id="answerText"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══════════════ CATEGORIES ═══════════════ -->
+<section class="section" id="section-categories">
+  <div class="section-title">
+    <span id="reportTitle">Report an Incident</span>
+    <div class="line"></div>
+  </div>
+  <div class="cat-grid" id="categoriesGrid"></div>
+</section>
+
+<!-- ═══════════════ SERVICES ═══════════════ -->
+<section class="section" id="section-services">
+  <div class="section-title">
+    <span id="servicesTitle">Services</span>
+    <div class="line"></div>
+  </div>
+  <div id="servicesList"></div>
+</section>
+
+<div class="bottom-pad"></div>
+
+<!-- ═══════════════ BOTTOM NAV ═══════════════ -->
+<nav class="bottom-nav">
+  <div class="nav-item active" id="nav-home" onclick="navTo('home')">
+    <span class="icon">🏠</span>
+    <span class="label" id="navHomeLabel">Home</span>
+  </div>
+  <div class="nav-item" id="nav-danger" onclick="openDanger()">
+    <span class="icon">🆘</span>
+    <span class="label">Danger</span>
+  </div>
+  <div class="nav-item" id="nav-categories" onclick="navTo('categories')">
+    <span class="icon">📋</span>
+    <span class="label" id="navCategoriesLabel">Categories</span>
+  </div>
+  <div class="nav-item" id="nav-services" onclick="navTo('services')">
+    <span class="icon">🏛️</span>
+    <span class="label" id="navServicesLabel">Services</span>
+  </div>
+  <div class="nav-item" id="nav-signup" onclick="openSignup()">
+    <span class="icon">👤</span>
+    <span class="label" id="navSignupLabel">Sign Up</span>
+  </div>
+</nav>
+
+
+<!-- ═══════════════ DANGER MODAL ═══════════════ -->
+<div class="overlay" id="dangerOverlay" onclick="closeDanger(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+
+    <!-- Step: Choice -->
+    <div id="dangerChoice">
+      <h2 id="dangerTitle">⚠️ Report a Danger</h2>
+      <p class="modal-sub" id="dangerSub">Is this an emergency requiring immediate help?</p>
+      <button class="urgent-btn" onclick="triggerUrgent()">
+        <span id="urgentBtnText">🆘 URGENT — Alert My Contacts</span>
+      </button>
+      <button class="not-urgent-btn" onclick="showDangerStep('categories')">
+        <span id="notUrgentBtnText">🔔 Not Urgent — Report Incident</span>
+      </button>
+      <button class="cancel-btn cancel-danger" onclick="closeDanger()">Cancel</button>
+    </div>
+
+    <!-- Step: Urgent -->
+    <div id="dangerUrgent" style="display:none">
+      <div style="text-align:center;padding:10px 0">
+        <div class="sos-circle" id="sosCircle">SOS</div>
+        <h3 id="urgentTitle" style="font-size:18px;font-weight:900;margin-bottom:8px">Sending Alert…</h3>
+        <div id="urgentBody"></div>
+      </div>
+      <button class="cancel-btn" id="closeDangerUrgent" onclick="closeDanger()">Close</button>
+    </div>
+
+    <!-- Step: Categories -->
+    <div id="dangerCategories" style="display:none">
+      <h2 id="dangerCatTitle">Select Incident Type</h2>
+      <p class="modal-sub" id="dangerCatSub">Choose the category that best describes your situation.</p>
+      <div class="modal-cat-grid" id="dangerCategoriesGrid"></div>
+      <button class="cancel-btn" id="backToChoice" onclick="showDangerStep('choice')">← Back</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ═══════════════ INCIDENT MODAL ═══════════════ -->
+<div class="overlay" id="incidentOverlay" onclick="closeIncident(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+
+    <div class="incident-header">
+      <span class="icon" id="incidentIcon">🔥</span>
+      <div>
+        <div class="title" id="incidentTitle">Fire Outbreak</div>
+        <div class="sub" id="incidentSub">Upload evidence and contact the unit</div>
+      </div>
+    </div>
+
+    <div class="nearest-unit-box">
+      <div class="nearest-unit-label" id="nearestUnitLabel">📍 Nearest Unit in Your Area</div>
+      <div class="nearest-unit-name" id="nearestUnitName">Brigade de Pompiers — Yaoundé Centre</div>
+      <div class="unit-contact-row">
+        <button class="unit-call" id="unitCallBtn">📞 +237 222 22 20 22</button>
+        <button class="unit-email" id="unitEmailBtn">✉️ Email Unit</button>
+      </div>
+    </div>
+
+    <textarea id="complaintText" rows="4" placeholder="Describe what is happening, address, any injuries…"></textarea>
+
+    <div class="incident-upload-row">
+      <label class="incident-upload-btn">
+        <span class="icon">📸</span><span id="photoLabel">Photo</span>
+        <input type="file" accept="image/*" style="display:none" onchange="addIncidentFile(this,'photo')" />
+      </label>
+      <label class="incident-upload-btn">
+        <span class="icon">🎥</span><span id="videoLabel">Video</span>
+        <input type="file" accept="video/*" style="display:none" onchange="addIncidentFile(this,'video')" />
+      </label>
+      <label class="incident-upload-btn">
+        <span class="icon">📄</span><span id="docLabel">Doc</span>
+        <input type="file" accept=".pdf,.doc,.docx" style="display:none" onchange="addIncidentFile(this,'doc')" />
+      </label>
+    </div>
+
+    <div class="file-chips" id="incidentFileChips"></div>
+
+    <button class="submit-btn" id="incidentSubmitBtn" onclick="submitIncident()">Submit Report</button>
+  </div>
+</div>
+
+
+<!-- ═══════════════ SIGNUP MODAL ═══════════════ -->
+<div class="overlay" id="signupOverlay" onclick="closeSignup(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 id="signupTitle">Join MyLawyer</h2>
+    <p class="modal-sub" id="signupSub">Quick sign up — takes less than a minute.</p>
+
+    <div id="ageNotice" style="background:#fff8e7;border-radius:8px;padding:8px 10px;font-size:11px;color:#b8860b;margin-bottom:14px">
+      ⚠️ <strong>Age Requirement: 18 years and above only.</strong>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="contactLabel">Phone Number or Email</label>
+      <div style="display:flex;gap:8px;margin-bottom:8px">
+        <button type="button" class="toggle-btn active" id="modePhone" onclick="setSignupMode('phone')">📱 Phone</button>
+        <button type="button" class="toggle-btn" id="modeEmail" onclick="setSignupMode('email')">✉️ Email</button>
+      </div>
+      <div class="phone-wrap" id="phoneWrap">
+        <span class="phone-prefix">🇨🇲 +237</span>
+        <input class="phone-input" id="signupPhone" type="tel" placeholder="6XX XXX XXX" oninput="detectContactType(this.value)" />
+      </div>
+      <input class="form-input" id="signupEmail" type="email" placeholder="yourname@email.com" style="display:none" oninput="detectContactType(this.value)" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="passwordLabel">Password</label>
+      <input class="form-input" id="signupPassword" type="password" placeholder="Choose a strong password" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="confirmPasswordLabel">Confirm Password</label>
+      <input class="form-input" id="signupConfirm" type="password" placeholder="Repeat your password" />
+    </div>
+
+    <button class="submit-btn" style="margin-top:4px" onclick="submitSignup()"><span id="signupSubmitText">Sign Up →</span></button>
+    <p id="nextStepNote" style="text-align:center;font-size:12px;color:var(--muted);margin:10px 0 4px">You will complete your profile in the next step</p>
+    <button class="cancel-btn" id="cancelSignup" onclick="closeSignup()">Cancel</button>
+  </div>
+</div>
+
+
+<!-- ═══════════════ PROFILE MODAL ═══════════════ -->
+<div class="overlay" id="profileOverlay" onclick="closeProfile(event)">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <h2 id="profileTitle">🎉 Set Up Your Profile</h2>
+    <p class="modal-sub" id="profileSub">Complete your profile for personalised legal assistance.</p>
+
+    <!-- Profile pic -->
+    <div class="profile-pic-wrap">
+      <div class="profile-pic-circle" id="profilePicCircle" onclick="document.getElementById('profilePicInput').click()">
+        👤
+        <div class="profile-pic-tap">TAP</div>
+      </div>
+      <input type="file" id="profilePicInput" accept="image/*" style="display:none" onchange="loadProfilePic(this)" />
+      <span class="profile-pic-label" id="profilePicLabel" onclick="document.getElementById('profilePicInput').click()">📷 Upload Profile Photo</span>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="fullNameLabel">Full Name (as on ID Card / Passport)</label>
+      <input class="form-input" id="profileFullName" type="text" placeholder="e.g. Jean-Paul Mbarga Nkodo" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="dobLabel">Date of Birth</label>
+      <input class="form-input" id="profileDob" type="date" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="idTypeLabel">ID Type</label>
+      <div class="toggle-btn-row">
+        <button type="button" class="toggle-btn active" id="idType_NationalID" onclick="setProfileIdType('National ID')">🪪 ID</button>
+        <button type="button" class="toggle-btn" id="idType_Passport" onclick="setProfileIdType('Passport')">📕 Passport</button>
+        <button type="button" class="toggle-btn" id="idType_DriversLicence" onclick="setProfileIdType(&#39;Driver&#39;s Licence&#39;)">🚗 Licence</button>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="idNumberLabel">ID Number</label>
+      <input class="form-input" id="idNumberInput" type="text" placeholder="Enter your National ID number" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="regionLabel">Region</label>
+      <select class="form-select" id="profileRegion"></select>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="divisionLabel">Division</label>
+      <input class="form-input" id="profileDivision" type="text" placeholder="e.g. Mfoundi, Wouri, Mezam…" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="subdivisionLabel">Sub-Division</label>
+      <input class="form-input" id="profileSubdivision" type="text" placeholder="e.g. Yaoundé 1er, Douala 2ème…" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="townLabel">Village / Town</label>
+      <input class="form-input" id="profileTown" type="text" placeholder="e.g. Bastos, Bonanjo, Bamenda…" />
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" id="quarterLabel">Quarter / Neighbourhood</label>
+      <input class="form-input" id="profileQuarter" type="text" placeholder="e.g. Omnisport, Deido, Mile 4…" />
+    </div>
+
+    <!-- Emergency Contacts -->
+    <div style="margin-top:8px;margin-bottom:14px">
+      <label class="form-label" id="emergencyContactsLabel">🆘 Emergency Contacts</label>
+      <p id="emergencyContactsNote" style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:12px">
+        When you press the URGENT button, your location and details will be sent by SMS to these people.
+      </p>
+
+      <div class="emergency-contact-box">
+        <div class="emergency-contact-label" id="contact1Label">Contact 1 (e.g. spouse, parent)</div>
+        <div class="form-group" style="margin-bottom:8px">
+          <input class="form-input contact-name-input" id="contact1Name" type="text" placeholder="Full name" />
+        </div>
+        <div class="phone-wrap">
+          <span class="phone-prefix">🇨🇲 +237</span>
+          <input class="phone-input" id="contact1Phone" type="tel" placeholder="6XX XXX XXX" />
+        </div>
+      </div>
+
+      <div class="emergency-contact-box">
+        <div class="emergency-contact-label" id="contact2Label">Contact 2 (e.g. neighbour, friend)</div>
+        <div class="form-group" style="margin-bottom:8px">
+          <input class="form-input contact-name-input" id="contact2Name" type="text" placeholder="Full name" />
+        </div>
+        <div class="phone-wrap">
+          <span class="phone-prefix">🇨🇲 +237</span>
+          <input class="phone-input" id="contact2Phone" type="tel" placeholder="6XX XXX XXX" />
+        </div>
+      </div>
+
+      <div class="emergency-contact-box">
+        <div class="emergency-contact-label" id="contact3Label">Contact 3 (e.g. community leader)</div>
+        <div class="form-group" style="margin-bottom:8px">
+          <input class="form-input contact-name-input" id="contact3Name" type="text" placeholder="Full name" />
+        </div>
+        <div class="phone-wrap">
+          <span class="phone-prefix">🇨🇲 +237</span>
+          <input class="phone-input" id="contact3Phone" type="tel" placeholder="6XX XXX XXX" />
+        </div>
+      </div>
+    </div>
+
+    <button class="submit-btn" style="margin-top:6px" onclick="saveProfile()"><span id="saveProfileText">Save Profile ✓</span></button>
+    <button class="cancel-btn" id="skipProfile" onclick="closeProfile()">Skip for now</button>
+  </div>
+</div>
+
+
+<!-- ═══════════════ DRAWER ═══════════════ -->
+<div class="drawer-overlay" id="drawerOverlay" onclick="toggleDrawer()"></div>
+<div class="drawer" id="drawer">
+  <div class="drawer-top">
+    <div class="drawer-brand">My<span>Lawyer</span> ⚖️</div>
+    <div class="drawer-tag" id="drawerTag">Legal Aid & Safety · Cameroon 🇨🇲</div>
+    <button class="drawer-close" onclick="toggleDrawer()">✕</button>
+  </div>
+  <div class="drawer-items">
+    <div class="drawer-item" onclick="toggleDrawer();openDanger()">
+      <span class="icon">🆘</span>
+      <span class="label" id="drawer-danger-label">Danger / SOS</span>
+      <span class="badge">LIVE</span>
+    </div>
+    <div class="drawer-item" onclick="toggleDrawer();navTo('categories')">
+      <span class="icon">📋</span>
+      <span class="label" id="drawer-categories-label">Categories</span>
+    </div>
+    <div class="drawer-item" onclick="toggleDrawer();navTo('services')">
+      <span class="icon">🏛️</span>
+      <span class="label" id="drawer-gov-label">Government Offices</span>
+    </div>
+    <div class="drawer-item" onclick="toggleDrawer();navTo('services')">
+      <span class="icon">✊</span>
+      <span class="label" id="drawer-rights-label">Human Rights Orgs</span>
+    </div>
+    <div class="drawer-item" onclick="toggleDrawer();navTo('services')">
+      <span class="icon">⚖️</span>
+      <span class="label" id="drawer-legal-label">Legal Aid Centres</span>
+    </div>
+    <div class="drawer-item" onclick="toggleDrawer();navTo('services')">
+      <span class="icon">🤝</span>
+      <span class="label" id="drawer-counselors-label">Counselors</span>
+    </div>
+    <div class="drawer-item" onclick="toggleDrawer();openSignup()">
+      <span class="icon">👤</span>
+      <span class="label" id="drawer-signup-label">Sign Up / Login</span>
+    </div>
+  </div>
+  <div class="drawer-bottom">
+    <button class="drawer-signup-btn" onclick="toggleDrawer();openSignup()" id="drawerSignupBtn">Sign Up — It's Free</button>
+  </div>
+</div>
+
+
+<!-- ═══════════════ SCRIPTS ═══════════════ -->
+<script>
+/* ═══════════════════════════════════════════════════════
+   MyLawyer — Data & Knowledge Base
+   ═══════════════════════════════════════════════════════ */
+
+// ── Cameroon Penal Code knowledge base (key sections)
+const PENAL = [{"h":"SECTION 1: Content","b":"The penal code is composed of: a) book | comprising Sections 1 to 101; b) book II comprising Sections 102 to 361; c) the decree relating to regulatory provisions of the Penal Code which define offences, comprising Sections 362 to 370; d) sections 371 and 372, which lay down the transitional and final provisions."},{"h":"SECTION 2: General and special application","b":"(1) This Code and every provision of criminal law shall be subject to the rules of international law and to all treaties duly promulgated and published."},{"h":"SECTION 11: international Offences","b":"The criminal law of the Republic shall apply to mercenary, racial discrimination, piracy, trafficking in persons, slave trade, slavery, trafficking in narcotics, trafficking in toxic wastes, money laundering, cyber criminality, corruption and offences of misappropriation of public property committed even outside the territory of the Republic."},{"h":"SECTION 17: Penalties and Offences to be prescribed","b":"No penalty or measure may be imposed unless provided by law, and except in respect of an offence lawfully defined."},{"h":"SECTION 18: Principal penalties","b":"The following are principal penalties: a) for natural persons: - death penalty; - imprisonment; - fine. b) for corporate bodies: dissolution; temporary or final closure; fine."},{"h":"SECTION 18-1: Alternative Penalties","b":"The following are alternative penalties: - community service; - reparatory sentence."},{"h":"SECTION 21: Classification of Offences","b":"Offences shall be classified as felonies, misdemeanours and simple offences according to the principal penalties provided for them: a felony shall mean an offence punishable with death or with loss of liberty for a maximum of more than 10 years; a misdemeanour shall mean an offence punishable with loss of liberty for more than 10 days but not more than 10 years."},{"h":"SECTION 24: Imprisonment","b":"Imprisonment shall mean loss of liberty during which the offender shall be obliged to work, subject to any contrary order of the court for reasons to be recorded in the judgment."},{"h":"SECTION 26: Community service","b":"Community service shall be a sentence passed for offences punishable with imprisonment of less than two years or with fine only. Such sentence shall be executed for the benefit of a public corporation or an association entrusted with performing a community service."},{"h":"SECTION 37: Definition of Preventive Confinement","b":"Preventive confinement shall mean confinement for from 5 to 20 years under a programme of work and social reformation."},{"h":"SECTION 43: Insane Persons","b":"Upon acquittal for insanity on a charge of felony or misdemeanour punishable with 2 years imprisonment or more and where the liberty of the accused shall have been found to be a public danger, the court shall order his confinement in a special institution."},{"h":"SECTION 44: Addict or partially insane","b":"Where an addict to alcohol or drugs, or a person suffering from mental sickness is convicted of a felony or misdemeanor punishable with 2 years imprisonment or more and related to his addiction or mental condition, and where his liberty shall have been found to be a public danger, the competent court may order his confinement in a special health institution."},{"h":"SECTION 54: Suspended Sentence","b":"Subject to any contrary provision of law, upon conviction for felony or misdemeanour of an offender not previously sentenced to imprisonment, the court may, for reasons to be recorded in the judgment, suspend for a period of from 3 to 5 years the enforcement of any sentence of imprisonment."},{"h":"SECTION 66: Pardon","b":"Pardon shall mean the commutation or remission, in whole or in part and with or without conditions, of a penalty or preventive measure or of the obligations of a probation order."},{"h":"SECTION 67: Prescription","b":"Where a principal penalty has remained unenforced: for felony: 20 years; for misdemeanour and simple offence tried with misdemeanour: 5 years; for any other simple offence: 2 years — neither it nor any accessory penalty or preventive measure accompanying it may any longer be enforced."},{"h":"SECTION 81: Threats","b":"No criminal responsibility shall arise from submission to threats, not otherwise avoidable, of imminent death or of grievous harm. This Section shall not apply to a person who has voluntarily exposed himself to the risk of such threats."},{"h":"SECTION 84: Lawful Defence","b":"No criminal responsibility shall arise from an act dictated by the immediate necessity of defence of the person acting or of any other person, or of any right of himself or of any other, against an unlawful infringement: Provided that the means of defence be proportionate to the seriousness of the infringement threatened."},{"h":"SECTION 85: Provocation","b":"Responsibility shall be diminished for an offence immediately provoked by the unlawful act of another against the offender or, in his presence, against his spouse, descendant or ascendant. Intentional killing or wounding shall be proportionate to a provocation by violent blows or injuries."},{"h":"SECTION 89: Public servants","b":"Being a public servant shall aggravate the responsibility of any such person guilty of any felony or misdemeanour against which it is his duty to guard or to take action."},{"h":"SECTION 111: Secession","b":"Whoever undertakes in whatever manner to infringe the territorial integrity of the Republic shall be punished with imprisonment for life. In time of war, or in a state of emergency or siege, the penalty shall be death."},{"h":"SECTION 113: Propagation of False Information","b":"Whoever sends out or propagates false information liable to injure public authorities or national unity shall be punished with imprisonment for from 3 months to 3 years and with fine of from CFAF 100,000 to CFAF 2,000,000."},{"h":"SECTION 122: Electoral Fraud","b":"Whoever registers on electoral registers using a false identity or who, during registration, conceals the fact that he has been convicted for an offence shall face criminal penalties."},{"h":"SECTION 123: Corruption and Violence in Election Matters","b":"Whoever through gifts, generosity, favours, promise of public or private employment or any other specific benefits offered with the purpose of influencing a vote shall face criminal penalties including imprisonment."},{"h":"SECTION 124: Against the Law or Public Service","b":"Any person in whom is vested any part of public authority, who concerts any measure contrary to law or designed to obstruct carrying on of a public service shall be punished with detention for from 6 months to 3 years."},{"h":"SECTION 125: On Legislature","b":"Any public servant who assumes the exercise of legislative power or refuses to enforce any provision of law shall be punished with imprisonment for from 6 months to 5 years."}];
+
+// ── Search the penal code by keyword relevance
+function searchPenal(query) {
+  const q = query.toLowerCase();
+  const words = q.split(/\s+/).filter(w => w.length > 3);
+  return PENAL.map(s => {
+    const combined = (s.h + " " + s.b).toLowerCase();
+    let score = 0;
+    words.forEach(w => {
+      if (combined.includes(w)) score += combined.split(w).length - 1;
+      if (s.h.toLowerCase().includes(w)) score += 3;
+    });
+    return Object.assign({}, s, { score });
+  }).filter(s => s.score > 0).sort((a, b) => b.score - a.score).slice(0, 5);
+}
+
+// ── Cameroon's 10 Regions
+const REGIONS = ["Adamawa Region","Centre Region","East Region","Far North Region",
+  "Littoral Region","North Region","North West Region","South Region","South West Region","West Region"];
+
+// ── Incident Categories
+const CATEGORIES = [
+  { id:"fire",     icon:"🔥", name:"Fire Outbreak",      nameF:"Incendie",            unit:"Brigade de Pompiers" },
+  { id:"robbery",  icon:"🚨", name:"Armed Robbery",      nameF:"Braquage",            unit:"Police Nationale" },
+  { id:"kidnap",   icon:"👶", name:"Kidnapping",         nameF:"Enlèvement",          unit:"Police Judiciaire" },
+  { id:"flood",    icon:"🌊", name:"Flood",              nameF:"Inondation",          unit:"Protection Civile" },
+  { id:"domestic", icon:"🏠", name:"Domestic Violence",  nameF:"Violence Domestique", unit:"Brigade Sociale" },
+  { id:"rights",   icon:"✊", name:"Human Rights",       nameF:"Droits de l'Homme",   unit:"CNDHL / REDHAC" },
+  { id:"accident", icon:"🚗", name:"Road Accident",      nameF:"Accident de Route",   unit:"Gendarmerie Nationale" },
+  { id:"drugs",    icon:"💊", name:"Drug Abuse",         nameF:"Abus de Drogues",     unit:"DGSN / MINSANTE" },
+  { id:"other",    icon:"⚠️", name:"Other",             nameF:"Autre",               unit:"Autorités Compétentes" },
+];
+
+// ── Services Directory
+const SERVICES = [
+  { icon:"🏛️", title:"Government Offices",    titleF:"Bureaux Gouvernementaux", desc:"Préfet, S.D.O., Mayor, CVUC, Tribunals — with requirements and contacts.", descF:"Préfet, S.D.O., Maire — avec conditions et contacts." },
+  { icon:"✊", title:"Human Rights Orgs",      titleF:"ONG des Droits de l'Homme", desc:"CNDHL, REDHAC, Mandela Center, HRW Cameroon, Nouveaux Droits de l'Homme.", descF:"CNDHL, REDHAC, Mandela Center, HRW Cameroun." },
+  { icon:"🌿", title:"Environment & Land",     titleF:"Environnement & Foncier", desc:"MINFOF, CED, land rights advocacy groups and environmental civil societies.", descF:"MINFOF, CED, groupes de défense des droits fonciers." },
+  { icon:"⚖️", title:"Legal Aid Centres",      titleF:"Centres d'Aide Juridique", desc:"Free or subsidised legal assistance offices across Cameroon.", descF:"Assistance juridique gratuite ou subventionnée à travers le Cameroun." },
+  { icon:"🤝", title:"Counselors",             titleF:"Conseillers", desc:"Marriage & Civil Status Counselors, Mental Health Counselors, Family Mediators.", descF:"Conseillers en mariage, en santé mentale et médiateurs familiaux." },
+];
+
+// ── ID Type labels (EN)
+const ID_LABELS = {
+  "National ID": ["ID Number","Enter your National ID number"],
+  "Passport": ["Passport Number","Enter your Passport number"],
+  "Driver's Licence": ["Driver's Licence Number","Enter your Driver's Licence number"]
+};
+
+/* ═══════════════════════════════════════════════════════
+   MyLawyer — Main Application Logic
+   ═══════════════════════════════════════════════════════ */
+
+// ── GLOBAL STATE
+const state = {
+  lang: "EN",
+  activeNav: "home",
+  userProfile: { emergencyContacts: [] },
+  currentIncident: null,
+  uploadedFiles: { advice: [], incident: [] },
+};
+
+// ─────────────────────────────────────────────
+// SPLASH SCREEN
+// ─────────────────────────────────────────────
+function runSplash() {
+  const letters = document.querySelectorAll('.sl');
+  const sub = document.getElementById('splashSub');
+  const splash = document.getElementById('splashScreen');
+  const total = letters.length;
+
+  // Phase 1: reveal letters one by one
+  letters.forEach((el, i) => {
+    setTimeout(() => el.classList.add('show'), i * 150);
+  });
+
+  const afterSpin = total * 150 + 500;
+  let waveDelay = afterSpin;
+
+  // Phase 2: wave x2
+  for (let pass = 0; pass < 2; pass++) {
+    letters.forEach((el, i) => {
+      setTimeout(() => {
+        el.classList.add('wave');
+        setTimeout(() => el.classList.remove('wave'), 180);
+      }, waveDelay + i * 80);
+    });
+    waveDelay += total * 80 + 400;
+  }
+
+  // Phase 3: subtitle
+  setTimeout(() => sub.classList.add('show'), waveDelay);
+
+  // Phase 4: fade out + remove
+  setTimeout(() => splash.classList.add('fadeout'), waveDelay + 900);
+  setTimeout(() => { splash.style.display = 'none'; }, waveDelay + 1400);
+}
+
+// ─────────────────────────────────────────────
+// LANGUAGE TOGGLE
+// ─────────────────────────────────────────────
+function setLang(lang) {
+  state.lang = lang;
+  document.getElementById('langEN').classList.toggle('active', lang === 'EN');
+  document.getElementById('langFR').classList.toggle('active', lang === 'FR');
+  renderApp();
+}
+
+// ─────────────────────────────────────────────
+// NAVIGATION
+// ─────────────────────────────────────────────
+function navTo(section) {
+  state.activeNav = section;
+  document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + section);
+  if (navEl) navEl.classList.add('active');
+
+  if (section === 'home') window.scrollTo({ top: 0, behavior: 'smooth' });
+  else if (section === 'categories') document.getElementById('section-categories').scrollIntoView({ behavior: 'smooth' });
+  else if (section === 'services') document.getElementById('section-services').scrollIntoView({ behavior: 'smooth' });
+}
+
+// ─────────────────────────────────────────────
+// DRAWER
+// ─────────────────────────────────────────────
+function toggleDrawer() {
+  document.getElementById('drawer').classList.toggle('open');
+  document.getElementById('drawerOverlay').classList.toggle('open');
+}
+
+// ─────────────────────────────────────────────
+// MODAL HELPERS
+// ─────────────────────────────────────────────
+function openOverlay(id) { document.getElementById(id).classList.add('open'); }
+function closeOverlay(id, evt) {
+  if (!evt || evt.target === document.getElementById(id)) {
+    document.getElementById(id).classList.remove('open');
+  }
+}
+
+// ─────────────────────────────────────────────
+// DANGER MODAL
+// ─────────────────────────────────────────────
+function openDanger() {
+  showDangerStep('choice');
+  openOverlay('dangerOverlay');
+}
+function closeDanger(evt) { closeOverlay('dangerOverlay', evt); }
+
+function showDangerStep(step) {
+  document.getElementById('dangerChoice').style.display = step === 'choice' ? 'block' : 'none';
+  document.getElementById('dangerUrgent').style.display = step === 'urgent' ? 'block' : 'none';
+  document.getElementById('dangerCategories').style.display = step === 'categories' ? 'block' : 'none';
+}
+
+function triggerUrgent() {
+  showDangerStep('urgent');
+  renderUrgentSending();
+  setTimeout(() => renderUrgentSent(), 2200);
+}
+
+function renderUrgentSending() {
+  const t = state.lang === 'FR';
+  const contacts = state.userProfile.emergencyContacts || [];
+  document.getElementById('sosCircle').classList.remove('sent');
+  document.getElementById('urgentTitle').textContent = t ? "Envoi de l'alerte…" : "Sending Alert…";
+  document.getElementById('urgentBody').innerHTML = `
+    <p style="font-size:13px;color:var(--muted);margin-bottom:16px">
+      ${contacts.length > 0
+        ? (t ? "Votre position est en cours de partage avec vos contacts d'urgence." : "Your location is being shared with your emergency contacts.")
+        : (t ? "Aucun contact d'urgence enregistré. Ajoutez-en dans votre profil." : "No emergency contacts saved yet. Add some in your profile.")}
+    </p>`;
+}
+
+function renderUrgentSent() {
+  const t = state.lang === 'FR';
+  const contacts = state.userProfile.emergencyContacts || [];
+  document.getElementById('sosCircle').classList.add('sent');
+  document.getElementById('urgentTitle').textContent = t ? "Alerte Envoyée" : "Alert Sent";
+
+  let html = '';
+  if (contacts.length > 0) {
+    html += `<p style="font-size:13px;color:var(--muted);margin-bottom:10px">
+      ${t ? "Votre nom, position GPS et numéro ont été envoyés par SMS à :" : "Your name, GPS location and number were sent by SMS to:"}
+    </p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px">`;
+    contacts.forEach(c => {
+      html += `<div class="contact-sent">
+        <span>👤 ${c.name || (t ? "Sans nom" : "Unnamed")}</span>
+        <span>✓ ${t ? "Envoyé" : "Sent"}</span>
+      </div>`;
+    });
+    html += `</div>`;
+  } else {
+    html += `<div class="no-contacts-warning">
+      ⚠️ ${t
+        ? "Aucun contact d'urgence n'est configuré. Allez dans Profil pour en ajouter, afin que de l'aide puisse vous être envoyée la prochaine fois."
+        : "No emergency contacts are set up. Go to Profile to add some, so help can be alerted next time."}
+    </div>`;
+  }
+
+  html += `<p style="font-size:12px;font-weight:700;color:var(--green);margin-bottom:10px">
+    ${t ? "Besoin d'aide immédiate ? Appelez :" : "Need immediate help? Call:"}
+  </p>
+  <div class="call-btn-row">
+    <button class="call-btn call-police" onclick="callEmergency('117')">📞 ${t ? "Police — 117" : "Police — 117"}</button>
+    <button class="call-btn call-fire" onclick="callEmergency('118')">🚒 ${t ? "Pompiers — 118" : "Fire — 118"}</button>
+  </div>`;
+
+  document.getElementById('urgentBody').innerHTML = html;
+}
+
+function callEmergency(number) {
+  window.location.href = `tel:${number}`;
+}
+
+function buildDangerCategoriesGrid() {
+  const grid = document.getElementById('dangerCategoriesGrid');
+  const t = state.lang === 'FR';
+  grid.innerHTML = CATEGORIES.map(cat => `
+    <div class="modal-cat-btn" onclick="selectIncidentCategory('${cat.id}')">
+      <span class="icon">${cat.icon}</span>
+      <span class="name">${t ? cat.nameF : cat.name}</span>
+    </div>
+  `).join('');
+}
+
+function selectIncidentCategory(catId) {
+  const cat = CATEGORIES.find(c => c.id === catId);
+  closeOverlay('dangerOverlay');
+  openIncident(cat);
+}
+
+// ─────────────────────────────────────────────
+// INCIDENT MODAL
+// ─────────────────────────────────────────────
+function openIncident(cat) {
+  state.currentIncident = cat;
+  state.uploadedFiles.incident = [];
+  const t = state.lang === 'FR';
+
+  document.getElementById('incidentIcon').textContent = cat.icon;
+  document.getElementById('incidentTitle').textContent = t ? cat.nameF : cat.name;
+  document.getElementById('incidentSub').textContent = t ? "Téléversez des preuves et contactez l'unité" : "Upload evidence and contact the unit";
+  document.getElementById('nearestUnitName').textContent = cat.unit + " — Yaoundé Centre";
+  document.getElementById('unitCallBtn').textContent = "📞 +237 222 22 20 22";
+  document.getElementById('unitEmailBtn').textContent = "✉️ " + (t ? "Envoyer Email" : "Email Unit");
+  document.getElementById('complaintText').value = '';
+  document.getElementById('complaintText').placeholder = t
+    ? "Décrivez ce qui se passe, l'adresse, les blessures…"
+    : "Describe what is happening, address, any injuries…";
+  document.getElementById('incidentFileChips').innerHTML = '';
+  document.getElementById('incidentSubmitBtn').textContent = t ? "Soumettre le Signalement" : "Submit Report";
+
+  openOverlay('incidentOverlay');
+}
+function closeIncident(evt) { closeOverlay('incidentOverlay', evt); }
+
+function addIncidentFile(input, type) {
+  const f = input.files[0]; if (!f) return;
+  const icons = { photo: "📸", video: "🎥", doc: "📄" };
+  state.uploadedFiles.incident.push({ name: f.name, icon: icons[type] });
+  renderIncidentFileChips();
+  input.value = '';
+}
+
+function renderIncidentFileChips() {
+  const chips = document.getElementById('incidentFileChips');
+  chips.innerHTML = state.uploadedFiles.incident.map((f, i) => `
+    <div class="file-chip">
+      ${f.icon} ${f.name}
+      <button onclick="removeIncidentFile(${i})">×</button>
+    </div>
+  `).join('');
+}
+function removeIncidentFile(i) {
+  state.uploadedFiles.incident.splice(i, 1);
+  renderIncidentFileChips();
+}
+
+function submitIncident() {
+  const t = state.lang === 'FR';
+  const complaint = document.getElementById('complaintText').value;
+  const report = {
+    incident: state.currentIncident ? state.currentIncident.name : null,
+    unit: state.currentIncident ? state.currentIncident.unit : null,
+    complaint,
+    files: state.uploadedFiles.incident.map(f => f.name),
+    reporter: state.userProfile,
+    timestamp: new Date().toLocaleString(),
+  };
+  console.log("REPORT:", report);
+  alert(t ? "✅ Signalement transmis. Restez en sécurité." : "✅ Report submitted. Keep safe.");
+  closeOverlay('incidentOverlay');
+}
+
+// ─────────────────────────────────────────────
+// SIGNUP MODAL
+// ─────────────────────────────────────────────
+let signupMode = 'phone';
+
+function openSignup() { openOverlay('signupOverlay'); }
+function closeSignup(evt) { closeOverlay('signupOverlay', evt); }
+
+function setSignupMode(mode) {
+  signupMode = mode;
+  document.getElementById('phoneWrap').style.display = mode === 'phone' ? 'flex' : 'none';
+  document.getElementById('signupEmail').style.display = mode === 'email' ? 'block' : 'none';
+  document.getElementById('modePhone').classList.toggle('active', mode === 'phone');
+  document.getElementById('modeEmail').classList.toggle('active', mode === 'email');
+}
+
+function detectContactType(val) {
+  if (val.includes('@')) setSignupMode('email');
+}
+
+function submitSignup() {
+  const t = state.lang === 'FR';
+  const pass = document.getElementById('signupPassword').value;
+  const confirm = document.getElementById('signupConfirm').value;
+  if (!pass || pass !== confirm) {
+    alert(t ? "Les mots de passe ne correspondent pas." : "Passwords do not match.");
+    return;
+  }
+  const phone = document.getElementById('signupPhone').value;
+  const email = document.getElementById('signupEmail').value;
+
+  state.userProfile.phone = signupMode === 'phone' ? '+237' + phone : '';
+  state.userProfile.email = signupMode === 'email' ? email : '';
+
+  closeOverlay('signupOverlay');
+  setTimeout(() => openOverlay('profileOverlay'), 300);
+}
+
+// ─────────────────────────────────────────────
+// PROFILE MODAL
+// ─────────────────────────────────────────────
+let profileIdType = 'National ID';
+
+function setProfileIdType(type) {
+  profileIdType = type;
+  document.querySelectorAll('.id-type-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('idType_' + type.replace(/[^a-zA-Z]/g, '')).classList.add('active');
+  const t = state.lang === 'FR';
+  const labels = ID_LABELS[type];
+  document.getElementById('idNumberLabel').textContent = t
+    ? (type === 'National ID' ? "Numéro de CNI" : type === 'Passport' ? "Numéro de Passeport" : "Numéro de Permis")
+    : labels[0];
+  document.getElementById('idNumberInput').placeholder = t
+    ? (type === 'National ID' ? "Entrez votre numéro de CNI" : type === 'Passport' ? "Entrez votre numéro de passeport" : "Entrez votre numéro de permis")
+    : labels[1];
+}
+
+function loadProfilePic(input) {
+  const f = input.files[0]; if (!f) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    const circle = document.getElementById('profilePicCircle');
+    circle.innerHTML = `<img src="${e.target.result}" /><div class="profile-pic-tap">TAP</div>`;
+  };
+  reader.readAsDataURL(f);
+}
+
+function closeProfile(evt) { closeOverlay('profileOverlay', evt); }
+
+function saveProfile() {
+  const contacts = [];
+  for (let i = 1; i <= 3; i++) {
+    const name = document.getElementById('contact' + i + 'Name').value.trim();
+    const phone = document.getElementById('contact' + i + 'Phone').value.trim();
+    if (name || phone) contacts.push({ name, phone: phone ? '+237' + phone : '' });
+  }
+
+  state.userProfile = Object.assign({}, state.userProfile, {
+    fullName: document.getElementById('profileFullName').value,
+    dob: document.getElementById('profileDob').value,
+    idType: profileIdType,
+    idNumber: document.getElementById('idNumberInput').value,
+    region: document.getElementById('profileRegion').value,
+    division: document.getElementById('profileDivision').value,
+    subdivision: document.getElementById('profileSubdivision').value,
+    town: document.getElementById('profileTown').value,
+    quarter: document.getElementById('profileQuarter').value,
+    emergencyContacts: contacts,
+  });
+
+  closeOverlay('profileOverlay');
+}
+
+// ─────────────────────────────────────────────
+// AI LEGAL ADVICE
+// ─────────────────────────────────────────────
+function openComposer() {
+  document.getElementById('adviceTrigger').style.display = 'none';
+  document.getElementById('adviceComposer').classList.add('open');
+  setTimeout(() => document.getElementById('adviceInput').focus(), 50);
+}
+function closeComposer() {
+  document.getElementById('adviceComposer').classList.remove('open');
+  document.getElementById('adviceTrigger').style.display = 'flex';
+}
+
+async function sendAdvice() {
+  const input = document.getElementById('adviceInput');
+  const query = input.value.trim();
+  if (!query) return;
+
+  const t = state.lang === 'FR';
+  closeComposer();
+
+  const answerBox = document.getElementById('adviceAnswer');
+  const answerText = document.getElementById('answerText');
+  const answerQuery = document.getElementById('answerQuery');
+
+  answerQuery.textContent = query;
+  answerText.innerHTML = '<div class="bounce-loader"><span></span><span></span><span></span></div>';
+  answerBox.classList.add('show');
+
+  const relevant = searchPenal(query);
+  const penalCtx = relevant.length > 0
+    ? "RELEVANT SECTIONS FROM CAMEROON PENAL CODE:\n\n" + relevant.map(s => s.h + ":\n" + s.b).join("\n\n")
+    : "";
+
+  const sys = `You are MyLawyer, the official legal assistant for Cameroon. Answer based on the Cameroon Penal Code (Law No. 2016/007), OHADA business law, and Cameroonian civil law. Use simple language. Cite Section numbers where relevant. State penalties clearly. Keep under 280 words. End with: "⚖️ For certified representation, contact a registered Avocat or Notaire." Respond in ${t ? "French" : "English"}.\n\n${penalCtx}`;
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-6",
+        max_tokens: 1000,
+        system: sys,
+        messages: [{ role: "user", content: query }]
+      })
+    });
+    const data = await res.json();
+    const text = (data.content || []).map(b => b.text || "").join("") || (t ? "Erreur. Réessayez." : "Error. Please try again.");
+    answerText.textContent = text;
+  } catch (e) {
+    answerText.textContent = t ? "Erreur réseau." : "Network error.";
+  }
+
+  input.value = '';
+}
+
+function adviceKeydown(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendAdvice();
+  }
+}
+
+// ─────────────────────────────────────────────
+// RENDER: CATEGORIES GRID
+// ─────────────────────────────────────────────
+function renderCategories() {
+  const t = state.lang === 'FR';
+  const grid = document.getElementById('categoriesGrid');
+  grid.innerHTML = CATEGORIES.map(cat => `
+    <div class="cat-card" onclick="openIncidentById('${cat.id}')">
+      <span class="icon">${cat.icon}</span>
+      <span class="name">${t ? cat.nameF : cat.name}</span>
+    </div>
+  `).join('');
+}
+
+function openIncidentById(catId) {
+  const cat = CATEGORIES.find(c => c.id === catId);
+  if (cat) openIncident(cat);
+}
+
+// ─────────────────────────────────────────────
+// RENDER: SERVICES LIST
+// ─────────────────────────────────────────────
+function renderServices() {
+  const t = state.lang === 'FR';
+  const list = document.getElementById('servicesList');
+  list.innerHTML = SERVICES.map(svc => `
+    <div class="service-card">
+      <div class="service-icon">${svc.icon}</div>
+      <div class="service-info">
+        <div class="title">${t ? svc.titleF : svc.title}</div>
+        <div class="desc">${t ? svc.descF : svc.desc}</div>
+      </div>
+      <div class="service-arrow">›</div>
+    </div>
+  `).join('');
+}
+
+// ─────────────────────────────────────────────
+// RENDER: REGIONS DROPDOWN
+// ─────────────────────────────────────────────
+function renderRegionOptions(selectId) {
+  const t = state.lang === 'FR';
+  const select = document.getElementById(selectId);
+  const current = select.value;
+  select.innerHTML = `<option value="">— ${t ? "Sélectionnez votre Région" : "Select your Region"} —</option>` +
+    REGIONS.map(r => `<option ${r === current ? 'selected' : ''}>${r}</option>`).join('');
+}
+
+// ─────────────────────────────────────────────
+// RENDER: FULL TEXT TRANSLATIONS
+// ─────────────────────────────────────────────
+function renderApp() {
+  const t = state.lang === 'FR';
+
+  // Hero
+  document.getElementById('heroTag').textContent = t ? "Aide Juridique & Sécurité — Cameroun" : "Legal Aid & Safety — Cameroon";
+  document.getElementById('heroTitle1').textContent = t ? "Vos Droits." : "Your Rights.";
+  document.getElementById('heroTitle2').textContent = t ? "Votre Protection." : "Your Protection.";
+  document.getElementById('heroSub').textContent = t
+    ? "Obtenez des conseils juridiques basés sur le droit camerounais, signalez des incidents et contactez les autorités."
+    : "Get instant legal advice based on Cameroonian law, report safety incidents, and connect with the right authorities.";
+
+  // Advice bar
+  document.getElementById('adviceLabel').textContent = t ? "Chercher une Assistance Juridique" : "Seek Legal Assistance";
+  document.getElementById('adviceTriggerText').textContent = t ? "Quelle question juridique avez-vous ?" : "What legal question is on your mind?";
+  document.getElementById('adviceInput').placeholder = t
+    ? "Posez votre question juridique... ex: Comment créer une entreprise au Cameroun ?"
+    : "Ask your legal question... e.g. How do I register a business in Cameroon?";
+  document.getElementById('askBtnText').textContent = t ? "Demander" : "Ask";
+  document.getElementById('aiBadge').textContent = t ? "IA · Droit Camerounais" : "AI · Cameroonian Law";
+
+  // Section titles
+  document.getElementById('reportTitle').textContent = t ? "Signaler un Incident" : "Report an Incident";
+  document.getElementById('servicesTitle').textContent = "Services";
+
+  // Bottom nav
+  document.getElementById('navHomeLabel').textContent = t ? "Accueil" : "Home";
+  document.getElementById('navCategoriesLabel').textContent = t ? "Catégories" : "Categories";
+  document.getElementById('navServicesLabel').textContent = "Services";
+  document.getElementById('navSignupLabel').textContent = t ? "Compte" : "Sign Up";
+
+  // Danger modal
+  document.getElementById('dangerTitle').textContent = "⚠️ " + (t ? "Signaler un Danger" : "Report a Danger");
+  document.getElementById('dangerSub').textContent = t ? "Est-ce une urgence nécessitant une aide immédiate ?" : "Is this an emergency requiring immediate help?";
+  document.getElementById('urgentBtnText').textContent = "🆘 " + (t ? "URGENT — Alerter mes Contacts" : "URGENT — Alert My Contacts");
+  document.getElementById('notUrgentBtnText').textContent = "🔔 " + (t ? "Pas Urgent — Signaler un Incident" : "Not Urgent — Report Incident");
+  document.querySelectorAll('.cancel-danger').forEach(el => el.textContent = t ? "Annuler" : "Cancel");
+  document.getElementById('closeDangerUrgent').textContent = t ? "Fermer" : "Close";
+  document.getElementById('dangerCatTitle').textContent = t ? "Type d'Incident" : "Select Incident Type";
+  document.getElementById('dangerCatSub').textContent = t ? "Choisissez la catégorie qui correspond à votre situation." : "Choose the category that best describes your situation.";
+  document.getElementById('backToChoice').textContent = "← " + (t ? "Retour" : "Back");
+
+  // Signup modal
+  document.getElementById('signupTitle').textContent = t ? "Rejoindre MyLawyer" : "Join MyLawyer";
+  document.getElementById('signupSub').textContent = t ? "Inscription rapide — moins d'une minute." : "Quick sign up — takes less than a minute.";
+  document.getElementById('ageNotice').innerHTML = "⚠️ <strong>" + (t ? "Âge minimum: 18 ans et plus." : "Age Requirement: 18 years and above only.") + "</strong>";
+  document.getElementById('contactLabel').textContent = t ? "Numéro de téléphone ou Email" : "Phone Number or Email";
+  document.getElementById('modePhone').innerHTML = "📱 " + (t ? "Téléphone" : "Phone");
+  document.getElementById('modeEmail').innerHTML = "✉️ Email";
+  document.getElementById('signupEmail').placeholder = "yourname@email.com";
+  document.getElementById('passwordLabel').textContent = t ? "Mot de passe" : "Password";
+  document.getElementById('signupPassword').placeholder = t ? "Choisissez un mot de passe" : "Choose a strong password";
+  document.getElementById('confirmPasswordLabel').textContent = t ? "Confirmer le mot de passe" : "Confirm Password";
+  document.getElementById('signupConfirm').placeholder = t ? "Répétez le mot de passe" : "Repeat your password";
+  document.getElementById('signupSubmitText').textContent = t ? "S'inscrire →" : "Sign Up →";
+  document.getElementById('nextStepNote').textContent = t ? "Vous compléterez votre profil à l'étape suivante" : "You will complete your profile in the next step";
+  document.getElementById('cancelSignup').textContent = t ? "Annuler" : "Cancel";
+
+  // Profile modal
+  document.getElementById('profileTitle').textContent = "🎉 " + (t ? "Configurer votre Profil" : "Set Up Your Profile");
+  document.getElementById('profileSub').textContent = t ? "Complétez votre profil pour une assistance personnalisée." : "Complete your profile for personalised legal assistance.";
+  document.getElementById('profilePicLabel').textContent = "📷 " + (t ? "Télécharger photo" : "Upload Profile Photo");
+  document.getElementById('fullNameLabel').textContent = t ? "Nom complet (tel que sur votre pièce d'identité)" : "Full Name (as on ID Card / Passport)";
+  document.getElementById('profileFullName').placeholder = t ? "ex: Jean-Paul Mbarga Nkodo" : "e.g. Jean-Paul Mbarga Nkodo";
+  document.getElementById('dobLabel').textContent = t ? "Date de naissance" : "Date of Birth";
+  document.getElementById('idTypeLabel').textContent = t ? "Type de pièce d'identité" : "ID Type";
+  document.getElementById('idType_NationalID').innerHTML = "🪪 " + (t ? "CNI" : "ID");
+  document.getElementById('idType_Passport').innerHTML = "📕 " + (t ? "Passeport" : "Passport");
+  document.getElementById('idType_DriversLicence').innerHTML = "🚗 " + (t ? "Permis" : "Licence");
+  setProfileIdType(profileIdType); // refresh id number label
+  document.getElementById('regionLabel').textContent = t ? "Région" : "Region";
+  renderRegionOptions('profileRegion');
+  document.getElementById('divisionLabel').textContent = t ? "Département" : "Division";
+  document.getElementById('profileDivision').placeholder = t ? "ex: Mfoundi, Wouri…" : "e.g. Mfoundi, Wouri, Mezam…";
+  document.getElementById('subdivisionLabel').textContent = t ? "Arrondissement" : "Sub-Division";
+  document.getElementById('profileSubdivision').placeholder = t ? "ex: Yaoundé 1er…" : "e.g. Yaoundé 1er, Douala 2ème…";
+  document.getElementById('townLabel').textContent = t ? "Village / Ville" : "Village / Town";
+  document.getElementById('profileTown').placeholder = t ? "ex: Bastos, Bonanjo…" : "e.g. Bastos, Bonanjo, Bamenda…";
+  document.getElementById('quarterLabel').textContent = t ? "Quartier" : "Quarter / Neighbourhood";
+  document.getElementById('profileQuarter').placeholder = t ? "ex: Omnisport, Deido…" : "e.g. Omnisport, Deido, Mile 4…";
+  document.getElementById('emergencyContactsLabel').textContent = "🆘 " + (t ? "Contacts d'Urgence" : "Emergency Contacts");
+  document.getElementById('emergencyContactsNote').textContent = t
+    ? "Lorsque vous appuyez sur le bouton URGENT, votre position et vos informations seront envoyées par SMS à ces personnes."
+    : "When you press the URGENT button, your location and details will be sent by SMS to these people.";
+  document.getElementById('contact1Label').textContent = t ? "Contact 1 (ex: époux/se, parent)" : "Contact 1 (e.g. spouse, parent)";
+  document.getElementById('contact2Label').textContent = t ? "Contact 2 (ex: voisin, ami)" : "Contact 2 (e.g. neighbour, friend)";
+  document.getElementById('contact3Label').textContent = t ? "Contact 3 (ex: chef de quartier)" : "Contact 3 (e.g. community leader)";
+  document.querySelectorAll('.contact-name-input').forEach(el => el.placeholder = t ? "Nom complet" : "Full name");
+  document.getElementById('saveProfileText').textContent = t ? "Enregistrer le Profil ✓" : "Save Profile ✓";
+  document.getElementById('skipProfile').textContent = t ? "Passer pour l'instant" : "Skip for now";
+
+  // Incident modal labels
+  document.getElementById('nearestUnitLabel').textContent = "📍 " + (t ? "Unité la plus proche" : "Nearest Unit in Your Area");
+  document.getElementById('photoLabel').textContent = "Photo";
+  document.getElementById('videoLabel').textContent = "Video";
+  document.getElementById('docLabel').textContent = t ? "Doc" : "Doc";
+
+  // Drawer
+  document.getElementById('drawerTag').textContent = t ? "Aide Juridique · Cameroun 🇨🇲" : "Legal Aid & Safety · Cameroon 🇨🇲";
+  document.getElementById('drawer-danger-label').textContent = "Danger / SOS";
+  document.getElementById('drawer-categories-label').textContent = t ? "Catégories" : "Categories";
+  document.getElementById('drawer-gov-label').textContent = t ? "Bureaux Gouvernementaux" : "Government Offices";
+  document.getElementById('drawer-rights-label').textContent = t ? "ONG Droits de l'Homme" : "Human Rights Orgs";
+  document.getElementById('drawer-legal-label').textContent = t ? "Centres d'Aide Juridique" : "Legal Aid Centres";
+  document.getElementById('drawer-counselors-label').textContent = t ? "Conseillers" : "Counselors";
+  document.getElementById('drawer-signup-label').textContent = t ? "Inscription / Connexion" : "Sign Up / Login";
+  document.getElementById('drawerSignupBtn').textContent = t ? "S'inscrire — C'est Gratuit" : "Sign Up — It's Free";
+
+  // Re-render dynamic content
+  renderCategories();
+  renderServices();
+  buildDangerCategoriesGrid();
+}
+
+// ─────────────────────────────────────────────
+// INIT
+// ─────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+  runSplash();
+  renderApp();
+});
+
+</script>
+</body>
+</html>
